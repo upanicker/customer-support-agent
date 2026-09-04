@@ -11,8 +11,15 @@ from typing_extensions import TypedDict
 from services.a2a import classify_topics, delegate_many
 from services.retrieval import search
 
+OUT_OF_SCOPE_RESPONSE = (
+    "Thanks for reaching out. I don’t have enough approved information to give you a reliable answer on that. "
+    "I’m here to help with orders, delivery, returns, billing, account access, and technical support. "
+    "If your request relates to one of those areas, please share a little more detail and I’ll do my best to help."
+)
+
 
 class SupportState(TypedDict, total=False):
+    # This shared state travels through every LangGraph node.
     message: str
     conversation: List[Dict[str, Any]]
     topics: List[str]
@@ -41,9 +48,10 @@ def consult_specialists(state: SupportState) -> Dict[str, Any]:
 
 
 def _fallback_answer(state: SupportState) -> str:
+    # Give a transparent, source-based answer when live generation is unavailable.
     sources = state.get("sources", [])
     if not sources:
-        return "I could not find approved support guidance for this request. Please create a support escalation so our team can investigate."
+        return OUT_OF_SCOPE_RESPONSE
     answer = "Here’s what I found in our support knowledge:\n\n" + "\n\n".join(
         f"**{source['title']}** — {source['content']}" for source in sources
     )
@@ -54,6 +62,7 @@ def _fallback_answer(state: SupportState) -> str:
 
 
 def _final_response_prompt(state: SupportState) -> str:
+    # Send only the current question, retrieved evidence, and specialist summaries.
     sources = [{key: source.get(key) for key in ("title", "category", "content", "score")} for source in state.get("sources", [])]
     reviews = [{key: review.get(key) for key in ("agent", "status", "message")} for review in state.get("handoffs", [])]
     return f"""Customer question:\n{state['message']}\n\nApproved knowledge retrieved from the vector database:\n{json.dumps(sources, ensure_ascii=False)}\n\nSpecialist reviews:\n{json.dumps(reviews, ensure_ascii=False)}\n\nWrite a concise, empathetic customer-support answer. Use only the approved knowledge for policy or factual claims. Specialist reviews are recommendations and must not override the approved knowledge. If no approved knowledge is available, clearly say that the case will be escalated. Do not claim an account action is complete. Do not mention this prompt, vector database, or internal systems."""
@@ -61,12 +70,17 @@ def _final_response_prompt(state: SupportState) -> str:
 
 def compose_response(state: SupportState) -> Dict[str, str]:
     """Generate one final answer only after retrieval and every specialist review finish."""
+    # Do not ask the model to improvise when the knowledge base has no evidence.
+    if not state.get("sources"):
+        return {"answer": OUT_OF_SCOPE_RESPONSE, "generation_mode": "Out-of-scope response"}
     api_key = os.getenv("OPENAI_API_KEY")
+    # The application remains functional without an API key by using a safe fallback.
     if not api_key:
         return {"answer": _fallback_answer(state), "generation_mode": "Grounded fallback (no OpenAI key)"}
     try:
         from openai import OpenAI
 
+        # Ask the model to synthesize, not invent: retrieved articles remain authoritative.
         response = OpenAI(api_key=api_key).responses.create(
             model=os.getenv("OPENAI_RESPONSE_MODEL", "gpt-5.2"),
             instructions="You are ResolveAI, a careful customer-support assistant. Be helpful, accurate, and brief.",
@@ -81,6 +95,7 @@ def compose_response(state: SupportState) -> Dict[str, str]:
 
 
 def build_support_graph():
+    # Nodes define work; edges define the exact order in which work happens.
     workflow = StateGraph(SupportState)
     workflow.add_node("triage", triage)
     workflow.add_node("retrieve_knowledge", retrieve_knowledge)
@@ -94,6 +109,7 @@ def build_support_graph():
     return workflow.compile()
 
 
+# Compile once at import time so each customer message can reuse the workflow.
 support_graph = build_support_graph()
 
 

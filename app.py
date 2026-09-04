@@ -9,9 +9,12 @@ from dotenv import load_dotenv
 
 from services.support_graph import resolve_support_request
 
+# Load local API-key configuration before the application starts.
 load_dotenv()
+# Configure Streamlit once, before rendering any widgets.
 st.set_page_config(page_title="ResolveAI", page_icon="✦", layout="wide", initial_sidebar_state="expanded")
 
+# Keep visual styling close to the UI so the prototype is easy to customize.
 st.markdown("""<style>
   :root { --ink:#172033; --muted:#64748b; --line:#dbe4f0; --canvas:#f6f8fc; --brand:#4659d9; --tint:#eef1ff; }
   .stApp { background:var(--canvas); color:var(--ink); }
@@ -42,6 +45,7 @@ st.markdown("""<style>
   hr { border-color:var(--line) !important; }
 </style>""", unsafe_allow_html=True)
 
+# Session state keeps the current browser conversation and operations data.
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Hi, I’m ResolveAI. I can help with orders, billing, returns, account access, and technical issues. What can I resolve for you?", "sources": [], "handoffs": []}]
 if "tickets" not in st.session_state: st.session_state.tickets = []
@@ -58,6 +62,7 @@ with st.sidebar:
     st.caption("Pinecone connected" if os.getenv("PINECONE_API_KEY") else "Demo knowledge mode")
     st.info("↗ A2A router ready")
     if st.button("New conversation", use_container_width=True):
+        # Preserve the welcome message while clearing prior chat turns.
         st.session_state.messages = st.session_state.messages[:1]
         st.rerun()
 
@@ -90,10 +95,12 @@ elif page == "Operations desk":
         priority = st.select_slider("Priority", options=["Low", "Normal", "High", "Urgent"], value="Normal")
         submitted = st.form_submit_button("Create support ticket", type="primary", use_container_width=True)
     if submitted:
+        # Validate user input before adding an in-session escalation record.
         clean_summary = summary.strip()
         if not clean_summary:
             st.warning("Enter an issue summary before creating the ticket.")
         else:
+            # UUID keeps prototype ticket IDs unique without a database.
             ticket = {"id": f"SUP-{str(uuid.uuid4())[:6].upper()}", "summary": clean_summary, "priority": priority, "created": datetime.now().strftime("%H:%M")}
             st.session_state.tickets.append(ticket)
             st.success(f"Ticket {ticket['id']} created and queued for human support.")
@@ -110,6 +117,7 @@ else:
     m2.markdown("<div class='metric-card'><div>AVAILABLE AGENTS</div><strong>3 specialists</strong></div>", unsafe_allow_html=True)
     m3.markdown("<div class='metric-card'><div>AVERAGE RESPONSE</div><strong>&lt; 3 sec</strong></div>", unsafe_allow_html=True)
     for msg in st.session_state.messages:
+        # Render each saved conversation turn, including evidence and handoffs.
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
             for handoff in msg.get("handoffs", []):
@@ -119,11 +127,17 @@ else:
                 score_label = f"{score * 100:.0f}% match" if isinstance(score, (int, float)) else "Match unavailable"
                 st.markdown(f"<div class='source'><b>{source['title']}</b> · {source['category']} · <b>{score_label}</b><br><small>{source['content']}</small></div>", unsafe_allow_html=True)
     if prompt := st.chat_input("Describe your issue…"):
+        # Save the customer message first so specialists can receive conversation context.
         st.session_state.messages.append({"role": "user", "content": prompt, "sources": [], "handoffs": []})
         with st.chat_message("user"): st.write(prompt)
-        result = resolve_support_request(prompt, st.session_state.messages)
+        # Show a visible buffering state while LangGraph retrieves knowledge and
+        # waits for every required specialist review.
+        with st.chat_message("assistant", avatar="✨"):
+            with st.spinner("ResolveAI is searching support knowledge and consulting specialists…"):
+                result = resolve_support_request(prompt, st.session_state.messages)
         sources, handoffs = result.get("sources", []), result.get("handoffs", [])
         st.session_state.handoffs.extend(handoffs)
         response = result["answer"]
+        # Store the final answer so it remains visible on the next Streamlit rerun.
         st.session_state.messages.append({"role": "assistant", "content": response, "sources": sources, "handoffs": handoffs})
         st.rerun()

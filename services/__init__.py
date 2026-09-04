@@ -1,1 +1,1 @@
-"""Services for retrieval and agent-to-agent delegation."""
+"""Reusable business logic kept outside the Streamlit user interface."""

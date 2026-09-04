@@ -19,6 +19,7 @@ SPECIALIST_INSTRUCTIONS = {
     "technical": "Review sign-in, app, browser, outage, and error issues. State only concise diagnostic or escalation guidance.",
 }
 
+# Keyword groups map a customer message to one or more specialist domains.
 TOPIC_KEYWORDS = {
     "billing": ("refund", "invoice", "charged", "payment", "subscription", "billing", "renewal"),
     "order": ("order", "delivery", "shipping", "tracking", "return", "package", "item"),
@@ -34,6 +35,7 @@ def classify(message: str) -> str | None:
 def classify_topics(message: str) -> list[str]:
     """Return every relevant support domain, allowing a request to use several agents."""
     text = message.lower()
+    # A list allows one prompt to reach multiple agents, such as Orders + Billing.
     return [topic for topic, keywords in TOPIC_KEYWORDS.items() if any(keyword in text for keyword in keywords)]
 
 
@@ -41,9 +43,11 @@ def delegate(topic: str | None, message: str, context: list[dict[str, str]]) -> 
     if not topic:
         return None
     agent, env_key = ROUTES[topic]
+    # An external URL opts into a remote A2A specialist for this domain.
     url = os.getenv(env_key)
     if not url:
         return _internal_review(topic, agent, message)
+    # Limit context to the latest turns to keep handoffs focused and small.
     payload = {"message": {"role": "user", "parts": [{"type": "text", "text": message}]}, "context": context[-6:]}
     try:
         response = requests.post(url, json=payload, timeout=12)
@@ -79,6 +83,7 @@ def delegate_many(topics: list[str], message: str, context: list[dict[str, str]]
     """Ask all relevant specialists, then return their reviews as one completed batch."""
     if not topics:
         return []
+    # Run independent specialist reviews concurrently, then wait for all results.
     with ThreadPoolExecutor(max_workers=len(topics)) as executor:
         results = list(executor.map(lambda topic: delegate(topic, message, context), topics))
     return [result for result in results if result is not None]
