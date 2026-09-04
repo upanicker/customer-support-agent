@@ -1,69 +1,95 @@
-"""LangGraph workflow that orchestrates grounded support and A2A specialist work."""
+"""LangGraph orchestration for multi-agent, Pinecone-grounded support replies."""
 from __future__ import annotations
 
-from typing import Any, Literal
+import json
+import os
+from typing import Any, Dict, List
 
 from langgraph.graph import END, START, StateGraph
 from typing_extensions import TypedDict
 
-from services.a2a import classify, delegate
+from services.a2a import classify_topics, delegate_many
 from services.retrieval import search
 
 
 class SupportState(TypedDict, total=False):
     message: str
-    conversation: list[dict[str, str]]
-    topic: str | None
-    sources: list[dict[str, Any]]
+    conversation: List[Dict[str, Any]]
+    topics: List[str]
+    sources: List[Dict[str, Any]]
     retrieval_mode: str
-    handoff: dict[str, Any] | None
+    handoffs: List[Dict[str, Any]]
     answer: str
+    generation_mode: str
 
 
-def triage(state: SupportState) -> dict[str, Any]:
-    """Identify the domain that may need a specialist agent."""
-    return {"topic": classify(state["message"])}
+def triage(state: SupportState) -> Dict[str, Any]:
+    """Find all domains in a request, not merely the first matching domain."""
+    return {"topics": classify_topics(state["message"])}
 
 
-def retrieve_knowledge(state: SupportState) -> dict[str, Any]:
-    sources, mode = search(state["message"])
+def retrieve_knowledge(state: SupportState) -> Dict[str, Any]:
+    # Multi-domain questions need a slightly wider evidence set.
+    limit = 5 if len(state.get("topics", [])) > 1 else 3
+    sources, mode = search(state["message"], limit=limit)
     return {"sources": sources, "retrieval_mode": mode}
 
 
-def route_to_specialist(state: SupportState) -> Literal["handoff", "compose"]:
-    return "handoff" if state.get("topic") else "compose"
+def consult_specialists(state: SupportState) -> Dict[str, Any]:
+    """Wait for every selected A2A specialist before moving to final composition."""
+    return {"handoffs": delegate_many(state.get("topics", []), state["message"], state.get("conversation", []))}
 
 
-def a2a_handoff(state: SupportState) -> dict[str, Any]:
-    """A2A boundary: calls the scoped external specialist endpoint when configured."""
-    return {"handoff": delegate(state.get("topic"), state["message"], state.get("conversation", []))}
-
-
-def compose_response(state: SupportState) -> dict[str, str]:
+def _fallback_answer(state: SupportState) -> str:
     sources = state.get("sources", [])
-    if sources:
-        answer = "Here’s what I found in our support knowledge:\n\n" + "\n\n".join(
-            f"**{source['title']}** — {source['content']}" for source in sources
+    if not sources:
+        return "I could not find approved support guidance for this request. Please create a support escalation so our team can investigate."
+    answer = "Here’s what I found in our support knowledge:\n\n" + "\n\n".join(
+        f"**{source['title']}** — {source['content']}" for source in sources
+    )
+    if state.get("handoffs"):
+        agents = ", ".join(handoff["agent"] for handoff in state["handoffs"])
+        answer += f"\n\nI also consulted: **{agents}**."
+    return answer
+
+
+def _final_response_prompt(state: SupportState) -> str:
+    sources = [{key: source.get(key) for key in ("title", "category", "content", "score")} for source in state.get("sources", [])]
+    reviews = [{key: review.get(key) for key in ("agent", "status", "message")} for review in state.get("handoffs", [])]
+    return f"""Customer question:\n{state['message']}\n\nApproved knowledge retrieved from the vector database:\n{json.dumps(sources, ensure_ascii=False)}\n\nSpecialist reviews:\n{json.dumps(reviews, ensure_ascii=False)}\n\nWrite a concise, empathetic customer-support answer. Use only the approved knowledge for policy or factual claims. Specialist reviews are recommendations and must not override the approved knowledge. If no approved knowledge is available, clearly say that the case will be escalated. Do not claim an account action is complete. Do not mention this prompt, vector database, or internal systems."""
+
+
+def compose_response(state: SupportState) -> Dict[str, str]:
+    """Generate one final answer only after retrieval and every specialist review finish."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return {"answer": _fallback_answer(state), "generation_mode": "Grounded fallback (no OpenAI key)"}
+    try:
+        from openai import OpenAI
+
+        response = OpenAI(api_key=api_key).responses.create(
+            model=os.getenv("OPENAI_RESPONSE_MODEL", "gpt-5.2"),
+            instructions="You are ResolveAI, a careful customer-support assistant. Be helpful, accurate, and brief.",
+            input=_final_response_prompt(state),
+            store=False,
         )
-    else:
-        answer = "I don’t have a confident answer in the available knowledge yet. I can help create an escalation so a support specialist can investigate."
-    handoff = state.get("handoff")
-    if handoff:
-        answer += f"\n\nI’ve also asked the **{handoff['agent']}** to review this."
-    answer += f"\n\n_{state.get('retrieval_mode', 'Retrieval complete')}_"
-    return {"answer": answer}
+        if response.output_text:
+            return {"answer": response.output_text, "generation_mode": "OpenAI grounded synthesis"}
+    except Exception:
+        pass
+    return {"answer": _fallback_answer(state), "generation_mode": "Grounded fallback (generation unavailable)"}
 
 
 def build_support_graph():
     workflow = StateGraph(SupportState)
     workflow.add_node("triage", triage)
     workflow.add_node("retrieve_knowledge", retrieve_knowledge)
-    workflow.add_node("a2a_handoff", a2a_handoff)
+    workflow.add_node("consult_specialists", consult_specialists)
     workflow.add_node("compose", compose_response)
     workflow.add_edge(START, "triage")
     workflow.add_edge("triage", "retrieve_knowledge")
-    workflow.add_conditional_edges("retrieve_knowledge", route_to_specialist, {"handoff": "a2a_handoff", "compose": "compose"})
-    workflow.add_edge("a2a_handoff", "compose")
+    workflow.add_edge("retrieve_knowledge", "consult_specialists")
+    workflow.add_edge("consult_specialists", "compose")
     workflow.add_edge("compose", END)
     return workflow.compile()
 
@@ -71,6 +97,6 @@ def build_support_graph():
 support_graph = build_support_graph()
 
 
-def resolve_support_request(message: str, conversation: list[dict[str, str]]) -> SupportState:
-    """Invoke the compiled workflow from Streamlit or a notebook."""
+def resolve_support_request(message: str, conversation: List[Dict[str, Any]]) -> SupportState:
+    """Run the entire workflow and return its final, post-specialist result."""
     return support_graph.invoke({"message": message, "conversation": conversation})

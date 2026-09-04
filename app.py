@@ -13,18 +13,37 @@ load_dotenv()
 st.set_page_config(page_title="ResolveAI", page_icon="✦", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""<style>
-  .stApp { background: #09111f; color: #e7edf7; }
-  [data-testid='stSidebar'] { background: #0d1728; border-right: 1px solid #22344f; }
-  .hero { padding: 1.4rem 0 .5rem; } .hero h1 { margin:0; font-size:2.25rem; letter-spacing:-.06em; }
-  .hero p { color:#9cafc9; margin:.4rem 0; } .eyebrow { color:#78e4c0; font-size:.78rem; font-weight:700; letter-spacing:.12em; }
-  .metric-card { border:1px solid #253954; border-radius:14px; padding:1rem; background:#101d31; }
-  .metric-card div { color:#91a5c1; font-size:.8rem; } .metric-card strong { font-size:1.45rem; }
-  .source { border-left:3px solid #64d7b0; background:#10243a; padding:.7rem .85rem; border-radius:0 8px 8px 0; margin:.35rem 0; }
-  .agent-pill { color:#78e4c0; font-size:.82rem; } .stChatMessage { background:#101d31; border-radius:14px; }
+  :root { --ink:#172033; --muted:#64748b; --line:#dbe4f0; --canvas:#f6f8fc; --brand:#4659d9; --tint:#eef1ff; }
+  .stApp { background:var(--canvas); color:var(--ink); }
+  [data-testid='stAppViewContainer'] { background:var(--canvas); }
+  .block-container { max-width:1180px; padding-top:2.35rem; padding-bottom:7rem; }
+  [data-testid='stSidebar'] { background:#ffffff; border-right:1px solid var(--line); }
+  [data-testid='stSidebar'] > div:first-child { padding-top:1.5rem; }
+  [data-testid='stSidebar'] * { color:var(--ink); }
+  [data-testid='stSidebar'] .stCaption { color:var(--muted) !important; }
+  [data-testid='stSidebar'] .stRadio label { padding:.35rem .15rem; font-weight:550; }
+  .hero { padding:.35rem 0 1.3rem; max-width:760px; }
+  .hero h1 { margin:0; font-size:2.5rem; color:var(--ink); letter-spacing:-.055em; line-height:1.1; }
+  .hero p { color:var(--muted); margin:.65rem 0 0; font-size:1.05rem; line-height:1.6; }
+  .eyebrow { color:#4054c8; font-size:.75rem; font-weight:800; letter-spacing:.13em; }
+  .metric-card { border:1px solid var(--line); border-radius:16px; padding:1.05rem 1.1rem; background:#ffffff; box-shadow:0 3px 12px rgba(30,41,59,.04); }
+  .metric-card div { color:var(--muted); font-size:.73rem; font-weight:750; letter-spacing:.06em; }
+  .metric-card strong { color:var(--ink); font-size:1.35rem; display:block; margin-top:.3rem; }
+  .source { border:1px solid #d9e4ff; border-left:4px solid #6376e8; background:#f6f8ff; color:var(--ink); padding:.8rem .9rem; border-radius:10px; margin:.55rem 0; line-height:1.45; }
+  .agent-pill { display:inline-block; margin-top:.45rem; padding:.25rem .55rem; border-radius:999px; background:#e9fbf2; color:#16734e; font-size:.78rem; font-weight:650; }
+  [data-testid='stChatMessage'] { background:#ffffff; border:1px solid var(--line); border-radius:16px; padding:.9rem 1rem; box-shadow:0 2px 8px rgba(30,41,59,.035); }
+  [data-testid='stChatMessage'] p { color:var(--ink); line-height:1.55; }
+  [data-testid='stChatInput'] { background:#ffffff; border:1px solid var(--line); border-radius:16px; box-shadow:0 -4px 18px rgba(30,41,59,.05); }
+  [data-testid='stChatInput'] textarea { color:var(--ink) !important; }
+  .stButton > button { border-radius:10px; border:1px solid #cfd8ef; color:#3547be; background:#f7f8ff; font-weight:650; }
+  .stButton > button:hover { border-color:#7282df; background:var(--tint); color:#2e40b5; }
+  div[data-testid='stAlert'] { border-radius:10px; }
+  .stMarkdown, .stMarkdown p, label, [data-testid='stMetricValue'] { color:var(--ink); }
+  hr { border-color:var(--line) !important; }
 </style>""", unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Hi, I’m ResolveAI. I can help with orders, billing, returns, account access, and technical issues. What can I resolve for you?", "sources": [], "handoff": None}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi, I’m ResolveAI. I can help with orders, billing, returns, account access, and technical issues. What can I resolve for you?", "sources": [], "handoffs": []}]
 if "tickets" not in st.session_state: st.session_state.tickets = []
 if "handoffs" not in st.session_state: st.session_state.handoffs = []
 
@@ -45,7 +64,7 @@ with st.sidebar:
 if page == "Architecture":
     st.markdown("<div class='hero'><div class='eyebrow'>SOLUTION DESIGN</div><h1>Grounded resolution, coordinated agents.</h1><p>Each response is traceable to knowledge, with specialists engaged only when their expertise is needed.</p></div>", unsafe_allow_html=True)
     st.graphviz_chart("""digraph {
-        rankdir=LR; bgcolor=\"#09111f\"; node [shape=box style=\"rounded,filled\" fillcolor=\"#101d31\" fontcolor=\"#e7edf7\" color=\"#64d7b0\"]; edge [color=\"#8ca6c9\"];
+        rankdir=LR; bgcolor=\"transparent\"; node [shape=box style=\"rounded,filled\" fillcolor=\"#ffffff\" fontcolor=\"#172033\" color=\"#bfccec\"]; edge [color=\"#7586dd\"];
         Customer -> \"Streamlit experience\" -> \"Conversation orchestrator\";
         \"Conversation orchestrator\" -> \"RAG retriever\" -> \"Pinecone vector database\";
         \"Conversation orchestrator\" -> \"Grounded response + citations\";
@@ -65,12 +84,19 @@ elif page == "Operations desk":
     b.markdown(f"<div class='metric-card'><div>AGENT HANDOFFS</div><strong>{len(st.session_state.handoffs)}</strong></div>", unsafe_allow_html=True)
     c.markdown("<div class='metric-card'><div>KNOWLEDGE COVERAGE</div><strong>92%</strong></div>", unsafe_allow_html=True)
     st.markdown("### Create escalation")
-    with st.form("ticket"):
+    st.caption("Add a short summary, choose a priority, then select **Create support ticket**.")
+    with st.form("ticket_form", clear_on_submit=True):
         summary = st.text_input("Issue summary", placeholder="e.g. Refund still pending after 10 business days")
         priority = st.select_slider("Priority", options=["Low", "Normal", "High", "Urgent"], value="Normal")
-        if st.form_submit_button("Create support ticket") and summary:
-            st.session_state.tickets.append({"id": f"SUP-{str(uuid.uuid4())[:6].upper()}", "summary": summary, "priority": priority, "created": datetime.now().strftime("%H:%M")})
-            st.success("Escalation created and queued for a human support specialist.")
+        submitted = st.form_submit_button("Create support ticket", type="primary", use_container_width=True)
+    if submitted:
+        clean_summary = summary.strip()
+        if not clean_summary:
+            st.warning("Enter an issue summary before creating the ticket.")
+        else:
+            ticket = {"id": f"SUP-{str(uuid.uuid4())[:6].upper()}", "summary": clean_summary, "priority": priority, "created": datetime.now().strftime("%H:%M")}
+            st.session_state.tickets.append(ticket)
+            st.success(f"Ticket {ticket['id']} created and queued for human support.")
     if st.session_state.tickets:
         st.markdown("### Active tickets")
         st.dataframe(st.session_state.tickets, use_container_width=True, hide_index=True)
@@ -86,14 +112,18 @@ else:
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
-            if msg.get("handoff"): st.markdown(f"<span class='agent-pill'>↗ Routed to {msg['handoff']['agent']} · {msg['handoff']['status']}</span>", unsafe_allow_html=True)
-            for source in msg.get("sources", []): st.markdown(f"<div class='source'><b>{source['title']}</b> · {source['category']}<br><small>{source['content']}</small></div>", unsafe_allow_html=True)
+            for handoff in msg.get("handoffs", []):
+                st.markdown(f"<span class='agent-pill'>↗ {handoff['agent']} · {handoff['status']}</span>", unsafe_allow_html=True)
+            for source in msg.get("sources", []):
+                score = source.get("score", 0)
+                score_label = f"{score * 100:.0f}% match" if isinstance(score, (int, float)) else "Match unavailable"
+                st.markdown(f"<div class='source'><b>{source['title']}</b> · {source['category']} · <b>{score_label}</b><br><small>{source['content']}</small></div>", unsafe_allow_html=True)
     if prompt := st.chat_input("Describe your issue…"):
-        st.session_state.messages.append({"role": "user", "content": prompt, "sources": [], "handoff": None})
+        st.session_state.messages.append({"role": "user", "content": prompt, "sources": [], "handoffs": []})
         with st.chat_message("user"): st.write(prompt)
         result = resolve_support_request(prompt, st.session_state.messages)
-        sources, handoff = result.get("sources", []), result.get("handoff")
-        if handoff: st.session_state.handoffs.append(handoff)
+        sources, handoffs = result.get("sources", []), result.get("handoffs", [])
+        st.session_state.handoffs.extend(handoffs)
         response = result["answer"]
-        st.session_state.messages.append({"role": "assistant", "content": response, "sources": sources, "handoff": handoff})
+        st.session_state.messages.append({"role": "assistant", "content": response, "sources": sources, "handoffs": handoffs})
         st.rerun()

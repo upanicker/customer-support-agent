@@ -21,10 +21,17 @@ if INDEX_NAME not in [item["name"] for item in pc.list_indexes()]:
     while not pc.describe_index(INDEX_NAME).status["ready"]:
         time.sleep(2)
 
+index_description = pc.describe_index(INDEX_NAME)
+INDEX_DIMENSION = getattr(index_description, "dimension", None) or index_description["dimension"]
+
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-embeddings = client.embeddings.create(model="text-embedding-3-small", input=[doc["content"] for doc in DOCS]).data
+embeddings = client.embeddings.create(
+    model="text-embedding-3-small",
+    input=[doc["content"] for doc in DOCS],
+    dimensions=INDEX_DIMENSION,
+).data
 vectors = [{"id": doc["id"], "values": embedding.embedding,
             "metadata": {key: doc[key] for key in ("title", "content", "category")}}
            for doc, embedding in zip(DOCS, embeddings)]
 pc.Index(INDEX_NAME).upsert(vectors=vectors, namespace=NAMESPACE)
-print(f"Upserted {len(vectors)} articles into {INDEX_NAME}/{NAMESPACE}.")
+print(f"Upserted {len(vectors)} articles into {INDEX_NAME}/{NAMESPACE} ({INDEX_DIMENSION}-dimension vectors).")

@@ -36,8 +36,13 @@ def search(query: str, limit: int = 3) -> tuple[list[dict[str, Any]], str]:
         from pinecone import Pinecone
         from openai import OpenAI
 
-        vector = OpenAI().embeddings.create(model="text-embedding-3-small", input=query).data[0].embedding
-        result = Pinecone(api_key=key).Index(index_name).query(
+        pinecone = Pinecone(api_key=key)
+        index_description = pinecone.describe_index(index_name)
+        dimension = getattr(index_description, "dimension", None) or index_description["dimension"]
+        vector = OpenAI().embeddings.create(
+            model="text-embedding-3-small", input=query, dimensions=dimension
+        ).data[0].embedding
+        result = pinecone.Index(index_name).query(
             vector=vector, top_k=limit, include_metadata=True,
             namespace=os.getenv("PINECONE_NAMESPACE", "help-center"),
         )
