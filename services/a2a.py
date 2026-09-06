@@ -5,6 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import requests
+from langsmith import traceable
+from langsmith.wrappers import wrap_openai
 
 
 ROUTES = {
@@ -39,6 +41,7 @@ def classify_topics(message: str) -> list[str]:
     return [topic for topic, keywords in TOPIC_KEYWORDS.items() if any(keyword in text for keyword in keywords)]
 
 
+@traceable(name="resolveai.a2a_specialist_handoff", run_type="tool")
 def delegate(topic: str | None, message: str, context: list[dict[str, str]]) -> dict[str, Any] | None:
     if not topic:
         return None
@@ -58,6 +61,7 @@ def delegate(topic: str | None, message: str, context: list[dict[str, str]]) -> 
         return {"agent": agent, "status": "unavailable", "message": f"Specialist endpoint could not be reached: {exc}"}
 
 
+@traceable(name="resolveai.internal_specialist_review", run_type="chain")
 def _internal_review(topic: str, agent: str, message: str) -> dict[str, Any]:
     """A scoped built-in specialist used until an external A2A endpoint is configured."""
     api_key = os.getenv("OPENAI_API_KEY")
@@ -66,7 +70,8 @@ def _internal_review(topic: str, agent: str, message: str) -> dict[str, Any]:
     try:
         from openai import OpenAI
 
-        response = OpenAI(api_key=api_key).responses.create(
+        # The wrapper adds the model call as a child run when tracing is configured.
+        response = wrap_openai(OpenAI(api_key=api_key)).responses.create(
             model=os.getenv("OPENAI_SPECIALIST_MODEL", os.getenv("OPENAI_RESPONSE_MODEL", "gpt-5.2")),
             instructions=f"You are the {agent}. {SPECIALIST_INSTRUCTIONS[topic]}",
             input=message,
@@ -79,6 +84,7 @@ def _internal_review(topic: str, agent: str, message: str) -> dict[str, Any]:
     return {"agent": agent, "status": "unavailable", "message": "Specialist review is temporarily unavailable; continue with the approved support knowledge."}
 
 
+@traceable(name="resolveai.a2a_specialist_batch", run_type="chain")
 def delegate_many(topics: list[str], message: str, context: list[dict[str, str]]) -> list[dict[str, Any]]:
     """Ask all relevant specialists, then return their reviews as one completed batch."""
     if not topics:

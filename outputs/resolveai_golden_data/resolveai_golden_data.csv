@@ -1,0 +1,46 @@
+Test case ID,Customer prompt,Expected intent,Expected specialist,Expected knowledge article,Expected application behavior,Test Result
+BIL-01,Where can I download my subscription invoice?,billing,Billing specialist,Find invoices and receipts,Retrieve invoice guidance and consult Billing.,PASS
+BIL-02,My subscription renewal failed. What should I do?,billing,Billing specialist,Failed subscription renewal,Retrieve renewal policy and consult Billing.,PASS
+BIL-03,I think I was charged twice for my order.,billing,Billing specialist,Duplicate or unrecognized charge,Retrieve duplicate-charge policy and consult Billing.,"PASS, invoked Order agent "
+BIL-04,How do I update my payment method?,billing,Billing specialist,Update a payment method,Retrieve payment-method instructions and consult Billing.,PASS
+BIL-05,How long will my refund take after my return is accepted?,billing,Billing specialist,Refund processing times,Retrieve refund timing and consult Billing.,"PASS, invoked Order agent "
+BIL-06,Can I get a receipt for my latest payment?,billing,Billing specialist,Find invoices and receipts,Retrieve receipt instructions and consult Billing.,PASS
+BIL-07,My card shows a pending charge. Is it a duplicate payment?,billing,Billing specialist,Duplicate or unrecognized charge,Retrieve authorization guidance and consult Billing.,PASS
+BIL-08,When will the system retry my failed payment?,billing,Billing specialist,Failed subscription renewal,Retrieve renewal retry policy and consult Billing.,PASS
+BIL-09,Will I lose access if my subscription payment keeps failing?,billing,Billing specialist,Failed subscription renewal,Retrieve grace-period guidance and consult Billing.,PASS
+BIL-10,Can support see my full card number to update it?,billing,Billing specialist,Update a payment method,Retrieve payment-security guidance and consult Billing.,PASS
+BIL-11,My refund has not appeared on my credit card yet.,billing,Billing specialist,Refund processing times,Retrieve bank processing guidance and consult Billing.,PASS + Tech Agent
+BIL-12,Will the delivery fee be refunded for a defective item?,billing,Billing specialist,Refund processing times,Retrieve shipping-fee refund policy and consult Billing.,"PASS, invoked Order agent "
+BIL-13,The billing name on my invoice is wrong.,billing,Billing specialist,Find invoices and receipts,Retrieve invoice details guidance and consult Billing.,PASS
+BIL-14,I do not recognize this settled payment charge.,billing,Billing specialist,Duplicate or unrecognized charge,Retrieve unfamiliar-charge guidance and consult Billing.,PASS
+BIL-15,Which saved payment method will be charged at renewal?,billing,Billing specialist,Update a payment method,Retrieve default payment method guidance and consult Billing.,PASS
+ORD-01,Where can I track my package?,order,Order specialist,Track an order,Retrieve tracking instructions and consult Orders.,PASS
+ORD-02,My order is still processing. Can I cancel it?,order,Order specialist,Cancel an order,Retrieve cancellation policy and consult Orders.,PASS
+ORD-03,Can I change my delivery address before dispatch?,order,Order specialist,Change a delivery address,Retrieve address-change policy and consult Orders.,PASS
+ORD-04,My package has not moved for five business days.,order,Order specialist,Track an order,Retrieve tracking escalation guidance and consult Orders.,PASS
+ORD-05,I received the wrong item in my order.,order,Order specialist,Missing or incorrect item,Retrieve replacement or refund guidance and consult Orders.,PASS
+ORD-06,How many days does standard delivery take?,order,Order specialist,Shipping and delivery times,Retrieve standard delivery timing and consult Orders.,PASS
+ORD-07,When will express shipping arrive?,order,Order specialist,Shipping and delivery times,Retrieve express delivery timing and consult Orders.,PASS
+ORD-08,Why is my tracking link still empty after dispatch?,order,Order specialist,Track an order,Retrieve tracking availability guidance and consult Orders.,PASS
+ORD-09,Can I redirect my package after it has shipped?,order,Order specialist,Change a delivery address,Retrieve post-dispatch address guidance and consult Orders.,PASS
+ORD-10,Can I cancel an order that has already been dispatched?,order,Order specialist,Cancel an order,Retrieve dispatched-order cancellation guidance and consult Orders.,PASS
+ORD-11,One item is missing from my package.,order,Order specialist,Missing or incorrect item,Retrieve missing-item reporting steps and consult Orders.,PASS
+ORD-12,The product delivered is not what I ordered.,order,Order specialist,Missing or incorrect item,Retrieve incorrect-item reporting steps and consult Orders.,PASS
+ORD-13,How do I start a return for my order?,order,Order specialist,Start a return,Retrieve return-label steps and consult Orders.,PASS
+ORD-14,Is this final-sale order eligible for a return?,order,Order specialist,Returns eligibility,Retrieve return eligibility and consult Orders.,PASS
+ORD-15,Can I return an opened hygiene item from my order?,order,Order specialist,Returns eligibility,Retrieve item eligibility and consult Orders.,PASS
+TEC-01,The app crashes every time I try to sign in.,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve troubleshooting steps and consult Technical.,PASS
+TEC-02,Is there a service outage right now?,technical,Technical specialist,Service outage and status updates,Retrieve outage guidance and consult Technical.,PASS
+TEC-03,The website keeps loading forever in my browser.,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve browser troubleshooting and consult Technical.,PASS
+TEC-04,Which browsers and devices are supported?,technical,Technical specialist,Supported browsers and devices,Retrieve compatibility guidance and consult Technical.,PASS
+TEC-05,I see an error when I open the mobile app.,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve diagnostics and consult Technical.,PASS
+TEC-06,The app is not working after the latest update.,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve update and cache guidance and consult Technical.,PASS
+TEC-07,I get a login error in Chrome but not in another browser.,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve browser troubleshooting and consult Technical.,PASS
+TEC-08,Should I clear the app cache to fix this error?,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve cache-clearing guidance and consult Technical.,PASS
+TEC-09,The website fails when my browser extensions are enabled.,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve extension troubleshooting and consult Technical.,PASS
+TEC-10,Can I use the app on an older Android device?,technical,Technical specialist,Supported browsers and devices,Retrieve mobile support guidance and consult Technical.,PASS
+TEC-11,My rooted device cannot log in to the app.,technical,Technical specialist,Supported browsers and devices,Retrieve device-support guidance and consult Technical.,PASS
+TEC-12,Where do I check planned maintenance updates?,technical,Technical specialist,Service outage and status updates,Retrieve status-page guidance and consult Technical.,PASS
+TEC-13,Should I retry my payment during an outage?,technical,Technical specialist,Service outage and status updates,Retrieve outage safety guidance and consult Technical.,PASS
+TEC-14,What details should I send support for this app crash?,technical,Technical specialist,Fix app loading or sign-in issues,Retrieve diagnostic-information guidance and consult Technical.,PASS
+TEC-15,The sign-in page is not working in Safari.,technical,Technical specialist,Supported browsers and devices,Retrieve browser support and troubleshooting guidance and consult Technical.,PASS

@@ -1,0 +1,70 @@
+<div id="resolveai-evaluation-architecture">
+  <style>
+    #resolveai-evaluation-architecture { color: var(--foreground); font-family: var(--font-sans, system-ui, sans-serif); }
+    #resolveai-evaluation-architecture h2 { margin: 0 0 14px; text-align: center; }
+    #resolveai-evaluation-architecture h2 span { border-bottom: 2px solid var(--primary); padding: 0 8px 5px; }
+    #resolveai-evaluation-architecture .rea-grid { display: grid; gap: 12px; }
+    #resolveai-evaluation-architecture .rea-row { display: grid; grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr); gap: 10px; align-items: stretch; }
+    #resolveai-evaluation-architecture .rea-stage { border: 1.5px solid var(--primary); border-radius: 16px; padding: 12px; background: color-mix(in srgb, var(--background) 90%, var(--primary) 10%); }
+    #resolveai-evaluation-architecture .rea-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 500; }
+    #resolveai-evaluation-architecture .rea-number { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 12px; }
+    #resolveai-evaluation-architecture .rea-arrow { display: grid; place-items: center; color: var(--primary); font-size: 24px; font-weight: 500; }
+    #resolveai-evaluation-architecture .rea-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    #resolveai-evaluation-architecture .rea-items.rea-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #resolveai-evaluation-architecture .rea-item { display: grid; justify-items: center; gap: 5px; min-height: 84px; padding: 9px 7px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--card-foreground); text-align: center; font-size: 13px; }
+    #resolveai-evaluation-architecture .rea-item i { color: var(--primary); }
+    #resolveai-evaluation-architecture .rea-item small { color: var(--muted-foreground); font-size: 11px; }
+    #resolveai-evaluation-architecture .rea-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    #resolveai-evaluation-architecture .rea-metric { padding: 9px 7px; border: 1px dashed var(--border); border-radius: 10px; background: color-mix(in srgb, var(--background) 92%, var(--accent) 8%); text-align: center; font-size: 12px; }
+    #resolveai-evaluation-architecture .rea-metric strong { display: block; margin-bottom: 4px; font-weight: 500; }
+    #resolveai-evaluation-architecture .rea-observe { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px; border: 1px dashed var(--purple); border-radius: 12px; background: color-mix(in srgb, var(--background) 92%, var(--purple) 8%); text-align: center; font-size: 13px; }
+    @media (max-width: 620px) { #resolveai-evaluation-architecture .rea-row { grid-template-columns: 1fr; } #resolveai-evaluation-architecture .rea-arrow { transform: rotate(90deg); min-height: 20px; } #resolveai-evaluation-architecture .rea-items, #resolveai-evaluation-architecture .rea-metrics { grid-template-columns: 1fr; } }
+  </style>
+  <h2><span>ResolveAI eval.ipynb and LangSmith architecture</span></h2>
+  <section class="rea-grid" aria-label="ResolveAI evaluation architecture">
+    <div class="rea-row">
+      <section class="rea-stage">
+        <div class="rea-head"><span class="rea-number">1</span> Load the golden evaluation set</div>
+        <div class="rea-items rea-two">
+          <div class="rea-item"><i data-lucide="file-spreadsheet" aria-hidden="true"></i><strong>Golden data CSV</strong><small>45 labelled prompts</small></div>
+          <div class="rea-item"><i data-lucide="table-properties" aria-hidden="true"></i><strong>Header detection</strong><small>validates required columns</small></div>
+        </div>
+      </section>
+      <div class="rea-arrow" aria-hidden="true">→</div>
+      <section class="rea-stage">
+        <div class="rea-head"><span class="rea-number">2</span> Execute the retrieval target</div>
+        <div class="rea-items rea-two">
+          <div class="rea-item"><i data-lucide="search" aria-hidden="true"></i><strong>pinecone_retrieval_target</strong><small>one prompt at a time</small></div>
+          <div class="rea-item"><i data-lucide="database" aria-hidden="true"></i><strong>Pinecone search</strong><small>top 3 article titles + scores</small></div>
+        </div>
+      </section>
+    </div>
+    <div class="rea-row">
+      <section class="rea-stage">
+        <div class="rea-head"><span class="rea-number">3</span> Create a versioned LangSmith dataset</div>
+        <div class="rea-items">
+          <div class="rea-item"><i data-lucide="key-round" aria-hidden="true"></i><strong>Credentials</strong><small>LangSmith API access</small></div>
+          <div class="rea-item"><i data-lucide="braces" aria-hidden="true"></i><strong>Examples</strong><small>prompt + expected article</small></div>
+          <div class="rea-item"><i data-lucide="layers-3" aria-hidden="true"></i><strong>Dataset</strong><small>golden retrieval v1</small></div>
+        </div>
+      </section>
+      <div class="rea-arrow" aria-hidden="true">→</div>
+      <section class="rea-stage">
+        <div class="rea-head"><span class="rea-number">4</span> Run the LangSmith experiment</div>
+        <div class="rea-items rea-two">
+          <div class="rea-item"><i data-lucide="play" aria-hidden="true"></i><strong>evaluate()</strong><small>max concurrency 4</small></div>
+          <div class="rea-item"><i data-lucide="workflow" aria-hidden="true"></i><strong>Traces</strong><small>target, retrieval, outputs</small></div>
+        </div>
+      </section>
+    </div>
+    <section class="rea-stage">
+      <div class="rea-head"><span class="rea-number">5</span> Score and inspect retrieval quality</div>
+      <div class="rea-metrics">
+        <div class="rea-metric"><strong>Expected article retrieved @ 3</strong>Did the correct article appear in the top three?</div>
+        <div class="rea-metric"><strong>Reciprocal rank</strong>Was the expected article ranked first, second, or third?</div>
+        <div class="rea-metric"><strong>Pinecone retrieval used</strong>Did the run avoid the local fallback?</div>
+      </div>
+    </section>
+    <div class="rea-observe"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>LangSmith experiment view provides aggregate scores, failed examples, retrieved titles, similarity scores, and execution traces.</div>
+  </section>
+</div>

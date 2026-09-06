@@ -1,0 +1,75 @@
+<div id="resolveai-support-architecture">
+  <style>
+    #resolveai-support-architecture { color: var(--foreground); font-family: var(--font-sans, system-ui, sans-serif); }
+    #resolveai-support-architecture h2 { margin: 0 0 14px; text-align: center; }
+    #resolveai-support-architecture h2 span { border-bottom: 2px solid var(--primary); padding: 0 8px 5px; }
+    #resolveai-support-architecture .rsa-grid { display: grid; gap: 12px; }
+    #resolveai-support-architecture .rsa-row { display: grid; grid-template-columns: minmax(0, 1.1fr) 26px minmax(0, .9fr); gap: 10px; align-items: stretch; }
+    #resolveai-support-architecture .rsa-stage { border: 1.5px solid var(--primary); border-radius: 16px; padding: 12px; background: color-mix(in srgb, var(--background) 90%, var(--primary) 10%); }
+    #resolveai-support-architecture .rsa-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 500; }
+    #resolveai-support-architecture .rsa-number { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 12px; }
+    #resolveai-support-architecture .rsa-arrow { display: grid; place-items: center; color: var(--primary); font-size: 24px; font-weight: 500; }
+    #resolveai-support-architecture .rsa-items { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    #resolveai-support-architecture .rsa-items.rsa-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #resolveai-support-architecture .rsa-item { display: grid; justify-items: center; gap: 5px; min-height: 80px; padding: 9px 7px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--card-foreground); text-align: center; font-size: 13px; }
+    #resolveai-support-architecture .rsa-item i { color: var(--primary); }
+    #resolveai-support-architecture .rsa-item small { color: var(--muted-foreground); font-size: 11px; }
+    #resolveai-support-architecture .rsa-workflow { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
+    #resolveai-support-architecture .rsa-step { padding: 6px 8px; border: 1px dashed var(--border); border-radius: 8px; background: var(--card); font-size: 12px; }
+    #resolveai-support-architecture .rsa-flow { color: var(--primary); }
+    #resolveai-support-architecture .rsa-agents { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    #resolveai-support-architecture .rsa-agent { padding: 9px 6px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--background) 88%, var(--accent) 12%); text-align: center; font-size: 12px; }
+    #resolveai-support-architecture .rsa-agent i { display: block; margin-bottom: 4px; color: var(--accent-foreground); }
+    #resolveai-support-architecture .rsa-observe { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 9px; border: 1px dashed var(--purple); border-radius: 12px; background: color-mix(in srgb, var(--background) 92%, var(--purple) 8%); font-size: 13px; text-align: center; }
+    @media (max-width: 620px) { #resolveai-support-architecture .rsa-row { grid-template-columns: 1fr; } #resolveai-support-architecture .rsa-arrow { transform: rotate(90deg); min-height: 20px; } #resolveai-support-architecture .rsa-items { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  </style>
+  <h2><span>ResolveAI customer support agent architecture</span></h2>
+  <section class="rsa-grid" aria-label="Customer support agent architecture">
+    <div class="rsa-row">
+      <section class="rsa-stage">
+        <div class="rsa-head"><span class="rsa-number">1</span> Prepare the support knowledge base</div>
+        <div class="rsa-items">
+          <div class="rsa-item"><i data-lucide="file-json" aria-hidden="true"></i><strong>Support articles</strong><small>demo_knowledge.json</small></div>
+          <div class="rsa-item"><i data-lucide="files" aria-hidden="true"></i><strong>Ingestion</strong><small>ingest.py</small></div>
+          <div class="rsa-item"><i data-lucide="brain-circuit" aria-hidden="true"></i><strong>Embeddings</strong><small>text-embedding-3-small</small></div>
+          <div class="rsa-item"><i data-lucide="database" aria-hidden="true"></i><strong>Pinecone</strong><small>vector index</small></div>
+        </div>
+      </section>
+      <div class="rsa-arrow" aria-hidden="true">→</div>
+      <section class="rsa-stage">
+        <div class="rsa-head"><span class="rsa-number">2</span> Receive and retrieve</div>
+        <div class="rsa-items rsa-three">
+          <div class="rsa-item"><i data-lucide="message-circle" aria-hidden="true"></i><strong>Streamlit chat</strong><small>prompt + history</small></div>
+          <div class="rsa-item"><i data-lucide="search" aria-hidden="true"></i><strong>Query Pinecone</strong><small>top matching articles</small></div>
+          <div class="rsa-item"><i data-lucide="list-filter" aria-hidden="true"></i><strong>Evidence</strong><small>sources + scores</small></div>
+        </div>
+      </section>
+    </div>
+    <div class="rsa-row">
+      <section class="rsa-stage">
+        <div class="rsa-head"><span class="rsa-number">3</span> Coordinate with LangGraph</div>
+        <div class="rsa-workflow" aria-label="LangGraph workflow">
+          <span class="rsa-step">Triage</span><span class="rsa-flow">→</span><span class="rsa-step">Retrieve knowledge</span><span class="rsa-flow">→</span><span class="rsa-step">Consult specialists</span><span class="rsa-flow">→</span><span class="rsa-step">Compose response</span>
+        </div>
+      </section>
+      <div class="rsa-arrow" aria-hidden="true">→</div>
+      <section class="rsa-stage">
+        <div class="rsa-head"><span class="rsa-number">4</span> Run specialist A2A handoffs</div>
+        <div class="rsa-agents">
+          <div class="rsa-agent"><i data-lucide="credit-card" aria-hidden="true"></i>Billing specialist</div>
+          <div class="rsa-agent"><i data-lucide="package-check" aria-hidden="true"></i>Order specialist</div>
+          <div class="rsa-agent"><i data-lucide="wrench" aria-hidden="true"></i>Technical specialist</div>
+        </div>
+      </section>
+    </div>
+    <section class="rsa-stage">
+      <div class="rsa-head"><span class="rsa-number">5</span> Deliver a safe customer outcome</div>
+      <div class="rsa-items rsa-three">
+        <div class="rsa-item"><i data-lucide="file-pen-line" aria-hidden="true"></i><strong>Grounded answer</strong><small>approved knowledge only</small></div>
+        <div class="rsa-item"><i data-lucide="badge-check" aria-hidden="true"></i><strong>Visible evidence</strong><small>sources + relevance scores</small></div>
+        <div class="rsa-item"><i data-lucide="ticket" aria-hidden="true"></i><strong>Escalation</strong><small>Operations Desk ticket</small></div>
+      </div>
+    </section>
+    <div class="rsa-observe"><i data-lucide="activity" aria-hidden="true"></i>Optional LangSmith tracing captures requests, retrieval, A2A handoffs, and model calls.</div>
+  </section>
+</div>

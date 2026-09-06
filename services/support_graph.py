@@ -6,6 +6,8 @@ import os
 from typing import Any, Dict, List
 
 from langgraph.graph import END, START, StateGraph
+from langsmith import traceable
+from langsmith.wrappers import wrap_openai
 from typing_extensions import TypedDict
 
 from services.a2a import classify_topics, delegate_many
@@ -81,7 +83,8 @@ def compose_response(state: SupportState) -> Dict[str, str]:
         from openai import OpenAI
 
         # Ask the model to synthesize, not invent: retrieved articles remain authoritative.
-        response = OpenAI(api_key=api_key).responses.create(
+        # Captures the final model synthesis as a child run in the LangSmith trace.
+        response = wrap_openai(OpenAI(api_key=api_key)).responses.create(
             model=os.getenv("OPENAI_RESPONSE_MODEL", "gpt-5.2"),
             instructions="You are ResolveAI, a careful customer-support assistant. Be helpful, accurate, and brief.",
             input=_final_response_prompt(state),
@@ -113,6 +116,9 @@ def build_support_graph():
 support_graph = build_support_graph()
 
 
+@traceable(name="resolveai.customer_support_request", run_type="chain")
 def resolve_support_request(message: str, conversation: List[Dict[str, Any]]) -> SupportState:
     """Run the entire workflow and return its final, post-specialist result."""
+    # LangGraph automatically traces this graph's nodes when LANGSMITH_TRACING=true.
+    # This named outer run keeps each customer request easy to find in LangSmith.
     return support_graph.invoke({"message": message, "conversation": conversation})

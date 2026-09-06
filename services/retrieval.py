@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from langsmith import traceable
+from langsmith.wrappers import wrap_openai
 
 # Bundled knowledge provides an offline fallback when Pinecone is not configured.
 DATA_PATH = Path(__file__).parents[1] / "data" / "demo_knowledge.json"
@@ -31,6 +33,7 @@ def _local_search(query: str, limit: int = 3) -> list[dict[str, Any]]:
             for score, doc in sorted(scored, reverse=True, key=lambda item: item[0])[:limit]]
 
 
+@traceable(name="resolveai.vector_search", run_type="retriever")
 def search(query: str, limit: int = 3) -> tuple[list[dict[str, Any]], str]:
     """Retrieve from Pinecone if enabled; otherwise return an inspectable local fallback."""
     key, index_name = os.getenv("PINECONE_API_KEY"), os.getenv("PINECONE_INDEX")
@@ -46,7 +49,9 @@ def search(query: str, limit: int = 3) -> tuple[list[dict[str, Any]], str]:
         pinecone = Pinecone(api_key=key)
         index_description = pinecone.describe_index(index_name)
         dimension = getattr(index_description, "dimension", None) or index_description["dimension"]
-        vector = OpenAI().embeddings.create(
+        # Wrapping the client records the embedding request beneath this retrieval run
+        # whenever LangSmith tracing is enabled. It behaves like the normal client locally.
+        vector = wrap_openai(OpenAI()).embeddings.create(
             model="text-embedding-3-small", input=query, dimensions=dimension
         ).data[0].embedding
         result = pinecone.Index(index_name).query(

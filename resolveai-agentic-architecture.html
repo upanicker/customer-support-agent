@@ -1,0 +1,222 @@
+<div id="resolveai-agentic-architecture">
+  <style>
+    #resolveai-agentic-architecture {
+      color: var(--foreground);
+      font-family: var(--font-sans, system-ui, sans-serif);
+      width: 100%;
+    }
+    #resolveai-agentic-architecture .ra-title {
+      margin: 0 0 16px;
+      text-align: center;
+    }
+    #resolveai-agentic-architecture .ra-title span {
+      display: inline-block;
+      border-bottom: 2px solid var(--primary);
+      padding: 0 8px 6px;
+    }
+    #resolveai-agentic-architecture .ra-flow {
+      display: grid;
+      gap: 12px;
+    }
+    #resolveai-agentic-architecture .ra-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+      gap: 10px;
+      align-items: stretch;
+    }
+    #resolveai-agentic-architecture .ra-row.ra-wide {
+      grid-template-columns: minmax(0, 0.8fr) 28px minmax(0, 1.2fr) 28px minmax(0, 1fr);
+    }
+    #resolveai-agentic-architecture .ra-stage {
+      border: 1.5px solid var(--primary);
+      border-radius: 16px;
+      padding: 12px;
+      min-width: 0;
+      background: color-mix(in srgb, var(--background) 88%, var(--primary) 12%);
+    }
+    #resolveai-agentic-architecture .ra-stage-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    #resolveai-agentic-architecture .ra-step {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      font-size: 12px;
+    }
+    #resolveai-agentic-architecture .ra-nodes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    #resolveai-agentic-architecture .ra-nodes.ra-four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    #resolveai-agentic-architecture .ra-node {
+      display: grid;
+      gap: 5px;
+      justify-items: center;
+      min-height: 84px;
+      padding: 10px 7px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--card-foreground);
+      text-align: center;
+      font-size: 13px;
+    }
+    #resolveai-agentic-architecture .ra-node i {
+      color: var(--primary);
+    }
+    #resolveai-agentic-architecture .ra-node strong {
+      font-weight: 500;
+    }
+    #resolveai-agentic-architecture .ra-node small {
+      color: var(--muted-foreground);
+      font-size: 11px;
+    }
+    #resolveai-agentic-architecture .ra-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: 500;
+    }
+    #resolveai-agentic-architecture .ra-chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    #resolveai-agentic-architecture .ra-chain-item {
+      padding: 6px 8px;
+      border: 1px dashed var(--border);
+      border-radius: 9px;
+      background: var(--card);
+      color: var(--card-foreground);
+      font-size: 12px;
+    }
+    #resolveai-agentic-architecture .ra-chain-arrow {
+      color: var(--primary);
+      font-size: 16px;
+    }
+    #resolveai-agentic-architecture .ra-specialists {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    #resolveai-agentic-architecture .ra-specialist {
+      padding: 8px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--foreground);
+      background: color-mix(in srgb, var(--background) 88%, var(--accent) 12%);
+      border: 1px solid var(--border);
+    }
+    #resolveai-agentic-architecture .ra-specialist i {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent-foreground);
+    }
+    #resolveai-agentic-architecture .ra-observe {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px dashed var(--purple);
+      border-radius: 12px;
+      color: var(--foreground);
+      background: color-mix(in srgb, var(--background) 92%, var(--purple) 8%);
+      text-align: center;
+      font-size: 13px;
+    }
+    #resolveai-agentic-architecture .ra-note {
+      margin: 12px 0 0;
+      color: var(--muted-foreground);
+      text-align: center;
+    }
+    @media (max-width: 620px) {
+      #resolveai-agentic-architecture .ra-row,
+      #resolveai-agentic-architecture .ra-row.ra-wide {
+        grid-template-columns: 1fr;
+      }
+      #resolveai-agentic-architecture .ra-arrow {
+        min-height: 22px;
+        transform: rotate(90deg);
+      }
+      #resolveai-agentic-architecture .ra-nodes,
+      #resolveai-agentic-architecture .ra-nodes.ra-four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+
+  <h2 class="ra-title"><span>ResolveAI agentic support architecture</span></h2>
+
+  <section class="ra-flow" aria-label="ResolveAI support request flow">
+    <div class="ra-row">
+      <section class="ra-stage" aria-label="Knowledge ingestion">
+        <div class="ra-stage-head"><span class="ra-step">1</span> Load, embed, and index knowledge</div>
+        <div class="ra-nodes ra-four">
+          <div class="ra-node"><i data-lucide="file-json" aria-hidden="true"></i><strong>Support knowledge</strong><small>demo_knowledge.json</small></div>
+          <div class="ra-node"><i data-lucide="files" aria-hidden="true"></i><strong>Ingest records</strong><small>ingest.py</small></div>
+          <div class="ra-node"><i data-lucide="brain-circuit" aria-hidden="true"></i><strong>Embed text</strong><small>text-embedding-3-small</small></div>
+          <div class="ra-node"><i data-lucide="database" aria-hidden="true"></i><strong>Pinecone index</strong><small>vector knowledge base</small></div>
+        </div>
+      </section>
+      <div class="ra-arrow" aria-hidden="true">→</div>
+      <section class="ra-stage" aria-label="Customer request">
+        <div class="ra-stage-head"><span class="ra-step">2</span> Receive customer request</div>
+        <div class="ra-nodes">
+          <div class="ra-node"><i data-lucide="message-circle" aria-hidden="true"></i><strong>Streamlit UI</strong><small>chat prompt and history</small></div>
+          <div class="ra-node"><i data-lucide="search" aria-hidden="true"></i><strong>Retriever</strong><small>query embedding</small></div>
+          <div class="ra-node"><i data-lucide="list-filter" aria-hidden="true"></i><strong>Evidence</strong><small>top sources + scores</small></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="ra-row ra-wide">
+      <section class="ra-stage" aria-label="LangGraph orchestration">
+        <div class="ra-stage-head"><span class="ra-step">3</span> Orchestrate with LangGraph</div>
+        <div class="ra-chain" aria-label="LangGraph workflow order">
+          <span class="ra-chain-item">Triage</span><span class="ra-chain-arrow">→</span>
+          <span class="ra-chain-item">Retrieve knowledge</span><span class="ra-chain-arrow">→</span>
+          <span class="ra-chain-item">Consult specialists</span><span class="ra-chain-arrow">→</span>
+          <span class="ra-chain-item">Compose</span>
+        </div>
+      </section>
+      <div class="ra-arrow" aria-hidden="true">→</div>
+      <section class="ra-stage" aria-label="Agent-to-agent specialist collaboration">
+        <div class="ra-stage-head"><span class="ra-step">4</span> Route to A2A specialists</div>
+        <div class="ra-specialists">
+          <div class="ra-specialist"><i data-lucide="credit-card" aria-hidden="true"></i>Billing specialist</div>
+          <div class="ra-specialist"><i data-lucide="package-check" aria-hidden="true"></i>Order specialist</div>
+          <div class="ra-specialist"><i data-lucide="wrench" aria-hidden="true"></i>Technical specialist</div>
+        </div>
+      </section>
+      <div class="ra-arrow" aria-hidden="true">→</div>
+      <section class="ra-stage" aria-label="Grounded customer response">
+        <div class="ra-stage-head"><span class="ra-step">5</span> Deliver one grounded response</div>
+        <div class="ra-nodes">
+          <div class="ra-node"><i data-lucide="file-pen-line" aria-hidden="true"></i><strong>Safe synthesis</strong><small>approved knowledge only</small></div>
+          <div class="ra-node"><i data-lucide="badge-check" aria-hidden="true"></i><strong>Customer answer</strong><small>sources and relevance scores</small></div>
+          <div class="ra-node"><i data-lucide="ticket" aria-hidden="true"></i><strong>Escalate when needed</strong><small>operations desk ticket</small></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="ra-observe" role="note"><i data-lucide="activity" aria-hidden="true"></i> Optional LangSmith tracing follows the request, retrieval, A2A handoffs, and model calls.</div>
+  </section>
+
+  <p class="ra-note">Customer prompt → Pinecone-grounded evidence → LangGraph coordination → specialist collaboration → reliable support response.</p>
+</div>

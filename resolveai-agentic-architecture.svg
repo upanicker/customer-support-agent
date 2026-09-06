@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040">
+  <rect width="1600" height="1040" fill="#fffdf5"/>
+  <style>
+    .title { font: 700 44px Arial, sans-serif; fill: #22203c; }
+    .head { font: 700 22px Arial, sans-serif; fill: #22203c; }
+    .label { font: 700 18px Arial, sans-serif; fill: #22203c; }
+    .small { font: 15px Arial, sans-serif; fill: #4e4b68; }
+    .tiny { font: 14px Arial, sans-serif; fill: #4e4b68; }
+    .stage { fill: #fffdf5; stroke: #55429b; stroke-width: 3; rx: 22; }
+    .node { fill: #ffffff; stroke: #55429b; stroke-width: 2; rx: 14; }
+    .accent { fill: #55429b; }
+    .line { fill: none; stroke: #55429b; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .dash { fill: #faf8ff; stroke: #55429b; stroke-width: 2; stroke-dasharray: 7 6; rx: 12; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#55429b"/>
+    </marker>
+  </defs>
+
+  <text x="800" y="60" text-anchor="middle" class="title">ResolveAI Agentic Support Architecture</text>
+  <path d="M390 78 H1210" class="line"/>
+
+  <rect x="45" y="105" width="805" height="265" class="stage"/>
+  <circle cx="82" cy="140" r="15" class="accent"/><text x="82" y="146" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#fff">1</text>
+  <text x="110" y="148" class="head">Load, embed, and index support knowledge</text>
+  <rect x="70" y="175" width="160" height="155" class="node"/>
+  <text x="150" y="214" text-anchor="middle" class="label">Support KB</text>
+  <text x="150" y="240" text-anchor="middle" class="small">demo_knowledge.json</text>
+  <text x="150" y="284" text-anchor="middle" font-size="38">▤</text>
+  <path d="M240 253 H285" class="line" marker-end="url(#arrow)"/>
+  <rect x="300" y="175" width="160" height="155" class="node"/>
+  <text x="380" y="214" text-anchor="middle" class="label">Ingest records</text>
+  <text x="380" y="240" text-anchor="middle" class="small">ingest.py</text>
+  <text x="380" y="284" text-anchor="middle" font-size="38">▱</text>
+  <path d="M470 253 H515" class="line" marker-end="url(#arrow)"/>
+  <rect x="530" y="175" width="160" height="155" class="node"/>
+  <text x="610" y="214" text-anchor="middle" class="label">OpenAI embeddings</text>
+  <text x="610" y="240" text-anchor="middle" class="small">text-embedding-3-small</text>
+  <text x="610" y="284" text-anchor="middle" font-size="38">◉</text>
+  <path d="M700 253 H745" class="line" marker-end="url(#arrow)"/>
+  <rect x="760" y="175" width="65" height="155" class="node"/>
+  <text x="792" y="225" text-anchor="middle" class="tiny">Pinecone</text>
+  <text x="792" y="250" text-anchor="middle" class="tiny">vector</text>
+  <text x="792" y="275" text-anchor="middle" class="tiny">index</text>
+
+  <rect x="875" y="105" width="680" height="265" class="stage"/>
+  <circle cx="912" cy="140" r="15" class="accent"/><text x="912" y="146" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#fff">2</text>
+  <text x="940" y="148" class="head">Receive the customer request</text>
+  <rect x="900" y="175" width="185" height="155" class="node"/>
+  <text x="992" y="214" text-anchor="middle" class="label">Streamlit chat UI</text>
+  <text x="992" y="240" text-anchor="middle" class="small">prompt + history</text>
+  <text x="992" y="284" text-anchor="middle" font-size="38">◌</text>
+  <path d="M1095 253 H1140" class="line" marker-end="url(#arrow)"/>
+  <rect x="1155" y="175" width="170" height="155" class="node"/>
+  <text x="1240" y="214" text-anchor="middle" class="label">Vector retrieval</text>
+  <text x="1240" y="240" text-anchor="middle" class="small">top sources + scores</text>
+  <text x="1240" y="284" text-anchor="middle" font-size="38">⌕</text>
+  <path d="M1335 253 H1380" class="line" marker-end="url(#arrow)"/>
+  <rect x="1395" y="175" width="130" height="155" class="node"/>
+  <text x="1460" y="220" text-anchor="middle" class="label">Evidence</text>
+  <text x="1460" y="246" text-anchor="middle" class="small">Pinecone</text>
+
+  <rect x="45" y="405" width="1510" height="245" class="stage"/>
+  <circle cx="82" cy="440" r="15" class="accent"/><text x="82" y="446" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#fff">3</text>
+  <text x="110" y="448" class="head">Coordinate the request with LangGraph and A2A specialists</text>
+  <rect x="70" y="485" width="745" height="125" class="dash"/>
+  <text x="95" y="515" class="label">LangGraph workflow</text>
+  <rect x="95" y="535" width="125" height="45" class="node"/><text x="157" y="563" text-anchor="middle" class="small">Triage</text>
+  <path d="M225 557 H255" class="line" marker-end="url(#arrow)"/>
+  <rect x="270" y="535" width="160" height="45" class="node"/><text x="350" y="563" text-anchor="middle" class="small">Retrieve knowledge</text>
+  <path d="M435 557 H465" class="line" marker-end="url(#arrow)"/>
+  <rect x="480" y="535" width="175" height="45" class="node"/><text x="568" y="563" text-anchor="middle" class="small">Consult specialists</text>
+  <path d="M660 557 H690" class="line" marker-end="url(#arrow)"/>
+  <rect x="705" y="535" width="85" height="45" class="node"/><text x="747" y="563" text-anchor="middle" class="small">Compose</text>
+  <path d="M825 547 H880" class="line" marker-end="url(#arrow)"/>
+  <rect x="895" y="485" width="625" height="125" class="dash"/>
+  <text x="920" y="515" class="label">A2A routing — all matching agents respond before composition</text>
+  <rect x="930" y="535" width="165" height="45" class="node"/><text x="1012" y="563" text-anchor="middle" class="small">Billing specialist</text>
+  <rect x="1120" y="535" width="165" height="45" class="node"/><text x="1202" y="563" text-anchor="middle" class="small">Order specialist</text>
+  <rect x="1310" y="535" width="165" height="45" class="node"/><text x="1392" y="563" text-anchor="middle" class="small">Technical specialist</text>
+
+  <rect x="45" y="685" width="1510" height="235" class="stage"/>
+  <circle cx="82" cy="720" r="15" class="accent"/><text x="82" y="726" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#fff">4</text>
+  <text x="110" y="728" class="head">Generate one grounded customer response</text>
+  <rect x="80" y="765" width="230" height="115" class="node"/>
+  <text x="195" y="805" text-anchor="middle" class="label">Safe response synthesis</text>
+  <text x="195" y="833" text-anchor="middle" class="small">approved knowledge only</text>
+  <path d="M320 823 H420" class="line" marker-end="url(#arrow)"/>
+  <rect x="435" y="765" width="260" height="115" class="node"/>
+  <text x="565" y="805" text-anchor="middle" class="label">ResolveAI customer answer</text>
+  <text x="565" y="833" text-anchor="middle" class="small">source citations + relevance scores</text>
+  <path d="M705 823 H805" class="line" marker-end="url(#arrow)"/>
+  <rect x="820" y="765" width="250" height="115" class="node"/>
+  <text x="945" y="805" text-anchor="middle" class="label">Diplomatic out-of-scope reply</text>
+  <text x="945" y="833" text-anchor="middle" class="small">do not guess or invent</text>
+  <path d="M1080 823 H1180" class="line" marker-end="url(#arrow)"/>
+  <rect x="1195" y="765" width="300" height="115" class="node"/>
+  <text x="1345" y="805" text-anchor="middle" class="label">Operations desk escalation</text>
+  <text x="1345" y="833" text-anchor="middle" class="small">create and track a support ticket</text>
+
+  <rect x="270" y="950" width="1060" height="50" rx="16" fill="#f5f1ff" stroke="#775bc6" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="800" y="982" text-anchor="middle" class="label">Optional LangSmith tracing: request → retrieval → A2A handoffs → OpenAI calls</text>
+</svg>
